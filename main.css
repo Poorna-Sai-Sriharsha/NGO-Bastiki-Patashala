@@ -1,0 +1,497 @@
+/* Animation for spinning effect */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Custom cursor styling */
+.cursor-pointer {
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%232c5282" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>'), auto;
+}
+
+/* Button hover effect */
+.btn-hover-effect:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.btn-hover-effect:active {
+    transform: translateY(0);
+}
+
+/* Timeline styling */
+.timeline-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 24px;
+    height: calc(100% - 24px);
+    width: 2px;
+    background-color: #e2e8f0;
+}
+
+/* Lightbox styling for gallery */
+.lightbox-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.lightbox-image {
+    max-width: 90%;
+    max-height: 90%;
+}
+
+.lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    color: #e2e8f0;
+    font-size: 30px;
+    cursor: pointer;
+}
+
+/* Progress bar styling for fundraising */
+.progress-bar {
+    height: 20px;
+    border-radius: 10px;
+    background-color: #edf2f7;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: #2c5282;
+    transition: width 0.5s ease;
+}
+
+/* Chatbot styling */
+.chatbot-message {
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.typing div {
+    width: 8px;
+    height: 8px;
+}
+
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f7fafc;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #718096;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #4a5568;
+}
+
+.dark ::-webkit-scrollbar-track {
+    background: #2d3748;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+    background: #a0aec0;
+}
+
+/* Enhanced NGO-specific styling */
+html, body {
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+    margin: 0;
+    padding: 0;
+}
+
+h1, h2, h3, h4 {
+    font-family: 'Merriweather', serif;
+    color: #2d3748;
+}
+
+a.nav-link {
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.btn-primary {
+    background-color: #2c5282;
+    color: #ffffff;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #2b6cb0;
+}
+
+.section-bg {
+    background-color: #f7fafc;
+}
+
+/* Ensure all sections use full width */
+section {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+}
+
+/* Prevent horizontal scrolling */
+* {
+    box-sizing: border-box;
+}
+
+.container {
+    width: 100%;
+    max-width: 100%;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+@media (min-width: 768px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+
+/* Projects section styling */
+.projects {
+    padding: 3rem 0;
+    background: linear-gradient(135deg, #F7F9FC 0%, #EFF6FF 100%);
+}
+
+.projects-container {
+    text-align: center;
+}
+
+.projects-container .section-title.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.projects-container .section-subtitle {
+    font-size: 1rem;
+    color: #4B5563;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    transition: opacity 0.5s ease 0.2s;
+}
+
+.projects-container .section-subtitle.show {
+    opacity: 1;
+}
+
+.projects.section {
+    padding: 2rem 0;
+    background: linear-gradient(135deg, #F7F9FC 0%, #EFF6FF 100%);
+    text-align: center;
+    overflow-x: hidden;
+}
+
+.projects-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    position: relative;
+    overflow-x: hidden;
+}
+
+.projects-card {
+    display: flex;
+    background: #FFFFFF;
+    border-radius: 12px;
+    overflow: hidden;
+    max-width: 1000px;
+    height: 400px;
+    margin: 0 auto 2rem;
+    box-shadow: 0 8px 24px rgba(31, 42, 68, 0.1);
+    transition: all 0.3s ease;
+}
+
+.projects-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(31, 42, 68, 0.12);
+}
+
+.projects-img-wrapper {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    border-radius: 12px 0 0 12px;
+    aspect-ratio: 5 / 4;
+}
+
+.projects-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.3s ease;
+    border-radius: 12px 0 0 12px;
+}
+
+.projects-card:hover .projects-img {
+    transform: scale(1.03);
+}
+
+.projects-data {
+    flex: 1;
+    padding: 2rem;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.projects-title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #1F2A44;
+    margin-bottom: 0.8rem;
+}
+
+.projects-description {
+    font-size: 0.95rem;
+    color: #475569;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.projects-button {
+    padding: 0.7rem 1.5rem;
+    border-radius: 50px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    background: #6366F1;
+    color: #FFFFFF;
+    border: none;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+}
+
+.projects-button.live-preview {
+    background: #FFFFFF;
+    color: #1F2A44;
+    border: 2px solid #6366F1;
+}
+
+.projects-button:hover {
+    background: #4B5EAA;
+    transform: translateY(-2px);
+}
+
+.projects-button.live-preview:hover {
+    background: #6366F1;
+    color: #FFFFFF;
+}
+
+.button-icon {
+    margin-left: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.btn-group {
+    display: flex;
+    gap: 1rem;
+}
+
+/* Swiper buttons styling */
+.swiper-button-next, .swiper-button-prev {
+    color: #FFFFFF;
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(45deg, #6366F1, #60A5FA);
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(31, 42, 68, 0.15);
+    transition: all 0.3s ease;
+    top: 50%;
+    transform: translateY(-50%);
+    position: absolute;
+    z-index: 10;
+}
+
+.swiper-button-prev {
+    left: 10px;
+}
+
+.swiper-button-next {
+    right: 10px;
+}
+
+.swiper-button-next::after, .swiper-button-prev::after {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.swiper-button-next:hover,.swiper-button-prev:hover {
+    transform: translateY(-50%) scale(1.1);
+    background: linear-gradient(45deg, #4B5EAA, #3B82F6);
+}
+
+
+
+.swiper-pagination-bullet {
+    background: #6366F1;
+    opacity: 0.5;
+    width: 6px; /* Reduced from 8px */
+    height: 6px; /* Reduced from 8px */
+}
+
+.swiper-pagination-bullet-active {
+    background: #6366F1;
+    opacity: 1;
+}
+
+/* Horizontal scrolling testimonials */
+.testimonials-scroll-container {
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 0 !important;
+    padding: 0;
+}
+
+.testimonials-row {
+    display: flex;
+    gap: 1.5rem;
+    animation: scrollTestimonials 30s linear infinite;
+    width: max-content;
+    padding: 0;
+    margin: 0;
+}
+
+.testimonials-row:hover {
+    animation-play-state: paused;
+}
+
+@keyframes scrollTestimonials {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+.testimonial-card {
+    flex: 0 0 300px;
+    min-width: 300px;
+    transition: all 0.3s ease;
+    padding: 0.5rem;
+    margin: 0;
+    margin-bottom: 0 !important;
+}
+
+.testimonial-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(31, 42, 68, 0.15);
+}
+
+/* Spacing between testimonials and volunteer sections */
+#testimonials {
+    padding-bottom: 1rem !important;
+    margin-bottom: 0 !important;
+}
+
+#volunteer {
+    padding-top: 1rem !important;
+    margin-top: 0 !important;
+}
+
+
+
+@media (max-width: 768px) {
+    #chatbot-container {
+        width: 90vw;
+        right: 1rem;
+        left: auto;
+    }
+}
+
+/* Testimonials section styling */
+.testimonial-img-wrapper {
+    flex-shrink: 0;
+}
+
+.testimonial-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center;
+    border: 3px solid #6366F1;
+    box-shadow: 0 4px 8px rgba(99, 102, 241, 0.2);
+    transition: all 0.3s ease;
+}
+
+.testimonial-img:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 12px rgba(99, 102, 241, 0.3);
+}
+
+.testimonial-card {
+    transition: all 0.3s ease;
+    padding: 0.5rem;
+    margin: 0 auto;
+    max-width: 600px;
+    margin-bottom: 0 !important;
+}
+
+.testimonial-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(31, 42, 68, 0.15);
+}
+
+.testimonial-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(31, 42, 68, 0.15);
+}
+
+.testimonial-description {
+    line-height: 1.4; /* Further reduced from 1.5 to tighten text */
+    font-size: 0.85rem; /* Further reduced from 0.9rem */
+    margin-bottom: 0.5rem; /* Further reduced from 0.75rem */
+}
+
+.testimonial-name {
+    margin-bottom: 0.2rem; /* Further reduced from 0.25rem */
+    font-size: 1rem; /* Further reduced from 1.1rem */
+}
+
+.testimonial-role {
+    font-size: 0.8rem; /* Further reduced from 0.85rem */
+}
+
+/* Progress bar additional styles */
+.progress-bar {
+    background-color: #e0e0e0;
+    height: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    background-color: #2563eb;
+    height: 100%;
+    width: 0;
+}

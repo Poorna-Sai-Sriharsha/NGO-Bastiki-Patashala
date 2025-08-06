@@ -1,0 +1,760 @@
+<link rel="stylesheet" href="main.css">
+<script src="script.js" defer></script>
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta tags for SEO and responsive design -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Helping Hands</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><path fill='%232563eb' d='M272 96c-78.6 0-145.1 51.5-167.7 122.5c33.6-17 71.5-26.5 111.7-26.5h88c8.8 0 16 7.2 16 16s-7.2 16-16 16h-88c-16.6 0-32.7 1.9-48.3 5.4c-6.2 1.4-11.9 3.1-17.4 5.1c-5.5 2-10.8 4.3-15.9 6.8c-5.1 2.5-10 5.2-14.7 8.1c-4.7 2.9-9.2 6-13.5 9.3c-4.3 3.3-8.4 6.7-12.3 10.3c-3.9 3.6-7.6 7.3-11.1 11.2c-3.5 3.9-6.8 7.9-9.9 12.1c-3.1 4.2-6 8.5-8.7 13c-2.7 4.5-5.2 9.1-7.5 13.8c-2.3 4.7-4.4 9.5-6.3 14.4c-1.9 4.9-3.5 9.9-4.9 15c-1.4 5.1-2.6 10.3-3.5 15.6c-0.9 5.3-1.6 10.7-2 16.2c-0.4 5.5-0.6 11.1-0.6 16.7c0 5.6 0.2 11.2 0.6 16.7c0.4 5.5 1.1 10.9 2 16.2c0.9 5.3 2.1 10.5 3.5 15.6c1.4 5.1 3 10.1 4.9 15c1.9 4.9 4 9.7 6.3 14.4c2.3 4.7 4.8 9.3 7.5 13.8c2.7 4.5 5.6 8.8 8.7 13c3.1 4.2 6.4 8.2 9.9 12.1c3.5 3.9 7.2 7.6 11.1 11.2c3.9 3.6 8 7 12.3 10.3c4.3 3.3 8.8 6.4 13.5 9.3c4.7 2.9 9.6 5.6 14.7 8.1c5.1 2.5 10.4 4.8 15.9 6.8c5.5 2 11.2 3.7 17.4 5.1c15.6 3.5 31.7 5.4 48.3 5.4h88c8.8 0 16 7.2 16 16s-7.2 16-16 16h-88c-40.2 0-78.1-9.5-111.7-26.5C126.9 364.5 193.4 416 272 416h88c8.8 0 16 7.2 16 16s-7.2 16-16 16h-88c-78.6 0-145.1-51.5-167.7-122.5C126.9 235.5 193.4 184 272 184h88c8.8 0 16 7.2 16 16s-7.2 16-16 16h-88c-40.2 0-78.1 9.5-111.7 26.5C126.9 147.5 193.4 96 272 96h88c8.8 0 16 7.2 16 16s-7.2 16-16 16h-88z'/><path fill='%232563eb' d='M160 256c0-17.7 14.3-32 32-32s32 14.3 32 32-14.3 32-32 32-32-14.3-32-32zm192 0c0-17.7 14.3-32 32-32s32 14.3 32 32-14.3 32-32 32-32-14.3-32-32z'/></svg>">
+    
+    <!-- External CSS Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css"/>
+    <link rel="stylesheet" href="main.css">
+</head>
+
+<!-- Main body with custom cursor and background styling -->
+<body class="cursor-pointer bg-gray-50 text-gray-800 transition-colors duration-300 w-full">
+    <!-- ===== NAVIGATION SECTION ===== -->
+    <nav class="bg-white shadow-md sticky top-0 z-40 transition-colors duration-300">
+        <div class="w-full px-2 md:px-4 py-3">
+            <div class="flex justify-between items-center">
+                <a href="#" class="flex items-center space-x-2">
+                    <i class="fas fa-hands-helping text-blue-600 text-2xl"></i>
+                    <span class="text-xl font-bold text-gray-800">Helping Hands</span>
+                </a>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#home" class="nav-link hover:text-blue-600">Home</a>
+                    <a href="#about" class="nav-link hover:text-blue-600">About Us</a>
+                    <a href="#volunteer" class="nav-link hover:text-blue-600">Volunteer</a>
+                    <a href="#events" class="nav-link hover:text-blue-600">Events</a>
+                    <a href="#gallery" class="nav-link hover:text-blue-600">Gallery</a>
+                    <a href="#contact" class="nav-link hover:text-blue-600">Contact</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="mobile-menu-button" class="md:hidden p-2 rounded-full hover:bg-gray-100">
+                        <i class="fas fa-bars text-gray-700"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden bg-white shadow-lg transition-all duration-300">
+            <div class="w-full px-2 md:px-4 py-3 flex flex-col space-y-3">
+                <a href="#home" class="nav-link hover:text-blue-600 py-2">Home</a>
+                <a href="#about" class="nav-link hover:text-blue-600 py-2">About Us</a>
+                <a href="#volunteer" class="nav-link hover:text-blue-600 py-2">Volunteer</a>
+                <a href="#events" class="nav-link hover:text-blue-600 py-2">Events</a>
+                <a href="#gallery" class="nav-link hover:text-blue-600 py-2">Gallery</a>
+                <a href="#contact" class="nav-link hover:text-blue-600 py-2">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== HERO SECTION ===== -->
+    <section id="home" class="relative bg-gradient-to-r from-blue-600 to-blue-800 text-gray-100 py-20">
+        <div class="w-full px-2 md:px-4">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-10 md:mb-0" data-aos="fade-right">
+                    <h1 class="text-4xl md:text-5xl font-bold mb-4" style="color:#ffffff">Together We Can Make a Difference</h1>
+                    <p class="text-xl mb-8">Join us in our mission to create positive change in communities around the world.</p>
+                    <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                        <a href="#volunteer" class="btn-hover-effect border-2 border-gray-100 hover:bg-gray-100 hover:text-blue-800 font-bold py-3 px-6 rounded-full volunteer-btn">Become a Volunteer</a>
+                        <a href="#" class="btn-hover-effect border-2 border-gray-100 hover:bg-gray-100 hover:text-blue-800 font-bold py-3 px-6 rounded-full">Donate Now</a>
+                    </div>
+                </div>
+                <div class="md:w-1/2" data-aos="fade-left">
+                    <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80" alt="Volunteers helping community" class="rounded-lg shadow-2xl w-full">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== IMPACT STATISTICS SECTION ===== -->
+    <section class="section-bg py-16">
+        <div class="container mx-auto px-2 md:px-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 text-center">
+                <div class="p-4 md:p-6" data-aos="fade-up">
+                    <div class="text-2xl md:text-4xl font-bold text-blue-600 mb-2 counter" data-target="1500">0</div>
+                    <div class="text-sm md:text-base text-gray-700">Volunteers</div>
+                </div>
+                <div class="p-4 md:p-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="text-2xl md:text-4xl font-bold text-blue-600 mb-2 counter" data-target="10000">0</div>
+                    <div class="text-sm md:text-base text-gray-700">People Helped</div>
+                </div>
+                <div class="p-4 md:p-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="text-2xl md:text-4xl font-bold text-blue-600 mb-2 counter" data-target="25">0</div>
+                    <div class="text-sm md:text-base text-gray-700">Countries</div>
+                </div>
+                <div class="p-4 md:p-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="text-2xl md:text-4xl font-bold text-blue-600 mb-2 counter" data-target="120">0</div>
+                    <div class="text-sm md:text-base text-gray-700">Projects</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== DONATION PROGRESS SECTION ===== -->
+    <section class="bg-white py-16">
+        <div class="container mx-auto px-4" data-aos="fade-up">
+            <h2 class="text-3xl font-bold text-center mb-8 text-gray-800" style="font-size:35px">Our Current Fundraising Goal</h2>
+            <div class="max-w-3xl mx-auto">
+                <div class="mb-4">
+                    <h3 class="text-xl font-semibold text-gray-800">Clean Water Initiative</h3>
+                    <p class="text-gray-600">Help us provide clean water to 10,000 people in rural areas</p>
+                </div>
+                <div class="progress-bar mb-2">
+                    <div class="progress-fill" style="width: 0%; transition: width 2s ease-in-out;"></div>
+                </div>
+                <div class="flex justify-between text-sm text-gray-600">
+                    <span>$7,500 raised</span>
+                    <span>Goal: $10,000</span>
+                </div>
+                <div class="mt-6 text-center">
+                    <button class="btn-hover-effect btn-primary font-bold py-3 px-8 rounded-full shadow-lg">Donate Now</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== ABOUT US SECTION ===== -->
+    <section id="about" class="section-bg py-8 md:py-16">
+        <div class="container mx-auto px-2 md:px-4">
+            <div class="text-center mb-12" data-aos="fade-up">
+                <h2 class="text-3xl font-bold mb-4 text-gray-800" style="font-size:35px">About Helping Hands</h2>
+                <div class="w-20 h-1 bg-blue-600 mx-auto"></div>
+            </div>
+            <div class="flex flex-col md:flex-row items-center mb-16">
+                <div class="md:w-1/2 mb-8 md:mb-0" data-aos="fade-right">
+                    <img src="https://images.unsplash.com/photo-1521791055366-0d553872125f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1469&q=80" alt="Our team" class="rounded-lg shadow-xl w-full">
+                </div>
+                <div class="md:w-1/2 md:pl-12" data-aos="fade-left">
+                    <h3 class="text-2xl font-bold mb-4 text-gray-800">Our Story</h3>
+                    <p class="text-gray-700 mb-4">Founded in 2010, Helping Hands began as a small group of passionate individuals determined to make a difference in their local community. What started as weekend volunteer projects has grown into an international organization with operations in 25 countries.</p>
+                    <p class="text-gray-700 mb-6">Our mission is to empower communities through sustainable development projects focused on education, clean water, healthcare, and economic opportunity.</p>
+                    <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                        <div class="bg-blue-100 p-4 rounded-lg flex items-center flex-1">
+                            <i class="fas fa-heart text-blue-600 text-2xl mr-3"></i>
+                            <h4 class="font-bold text-gray-800">Compassion</h4>
+                        </div>
+                        <div class="bg-blue-100 p-4 rounded-lg flex items-center flex-1">
+                            <i class="fas fa-hand-holding-heart text-blue-600 text-2xl mr-3"></i>
+                            <h4 class="font-bold text-gray-800">Service</h4>
+                        </div>
+                        <div class="bg-blue-100 p-4 rounded-lg flex items-center flex-1">
+                            <i class="fas fa-globe text-blue-600 text-2xl mr-3"></i>
+                            <h4 class="font-bold text-gray-800">Impact</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-16">
+                <h3 class="text-2xl font-bold mb-8 text-center text-gray-800" data-aos="fade-up" style="font-size:35px">Meet Our Leadership Team</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden" data-aos="zoom-in">
+                        <img src="https://media.istockphoto.com/id/2157749303/photo/smiling-young-middle-eastern-israel-businesswoman-using-laptop-pc-online-application-for-work.jpg?s=612x612&w=0&k=20&c=TTlzpGbWNGoE_PFXQ621bbSaBgipBZvpelbr86tRhig=" alt="Team member" class="w-full h-48 object-cover">
+                        <div class="p-4">
+                            <h4 class="font-bold text-gray-800">Vaishnavi Patil</h4>
+                            <p class="text-blue-600 mb-2">Founder & CEO</p>
+                            <p class="text-gray-600 text-sm">Vaishnavi founded Helping Hands after volunteering in rural communities across India.</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden" data-aos="zoom-in" data-aos-delay="100">
+                        <img src="https://www.shutterstock.com/image-photo/portrait-young-investor-banker-workplace-260nw-2364566447.jpg" alt="Team member" class="w-full h-48 object-cover">
+                        <div class="p-4">
+                            <h4 class="font-bold text-gray-800">Ravi Kumar</h4>
+                            <p class="text-blue-600 mb-2">Director of Operations</p>
+                            <p class="text-gray-600 text-sm">Ravi oversees all field operations and ensures projects are delivered effectively.</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden" data-aos="zoom-in" data-aos-delay="200">
+                        <img src="https://media.istockphoto.com/id/1447909282/photo/young-indian-girl-with-laptop.jpg?s=612x612&w=0&k=20&c=kKhBOZpantCZV7kxXscg8t34m5glTuh15PxVGQKI1VI=" alt="Team member" class="w-full h-48 object-cover">
+                        <div class="p-4">
+                            <h4 class="font-bold text-gray-800">Ananya Laxmi</h4>
+                            <p class="text-blue-600 mb-2">Director of Fundraising</p>
+                            <p class="text-gray-600 text-sm">Ananya leads our fundraising efforts and donor relations across all regions.</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden" data-aos="zoom-in" data-aos-delay="300">
+                        <img src="https://media.istockphoto.com/id/1369199360/photo/portrait-of-a-handsome-young-businessman-working-in-office.jpg?s=612x612&w=0&k=20&c=ujyGdu8jKI2UB5515XZA33Tt4DBhDU19dKSTUTMZvrg=" alt="Team member" class="w-full h-48 object-cover">
+                        <div class="p-4">
+                            <h4 class="font-bold text-gray-800">Pranav Tej</h4>
+                            <p class="text-blue-600 mb-2">Director of Volunteers</p>
+                            <p class="text-gray-600 text-sm">Pranav manages our global volunteer network and training programs.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div data-aos="fade-up">
+                <h3 class="text-2xl font-bold mb-8 text-center text-gray-800" style="font-size:35px">As Seen In</h3>
+                <div class="flex flex-wrap justify-center items-center gap-6 md:gap-12">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR6nIcKUuCuFa3R6GbAWfgM7Zn6K--yYhU5aw&s" alt="CNN" class="max-h-14 w-auto max-w-[150px] object-contain opacity-70 hover:opacity-100 hover:scale-110 transition-opacity transition-transform duration-300">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/BBC_Logo_2021.svg" alt="BBC" class="max-h-14 w-auto max-w-[130px] object-contain opacity-70 hover:opacity-100 hover:scale-110 transition-opacity transition-transform duration-300">
+                    <img src="https://logos-world.net/wp-content/uploads/2020/11/The-New-York-Times-Logo.png" alt="New York Times" class="max-h-16 w-auto max-w-[300px] object-contain opacity-70 hover:opacity-100 hover:scale-110 transition-opacity transition-transform duration-300">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUUD-fzVTIDxAX5sVbYuw6NPXIW-Qjt6Oveg&s" alt="The Guardian" class="max-h-14 w-auto max-w-[180px] object-contain opacity-70 hover:opacity-100 hover:scale-110 transition-opacity transition-transform duration-300">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Forbes_logo.svg/2560px-Forbes_logo.svg.png" alt="Forbes" class="max-h-14 w-auto max-w-[150px] object-contain opacity-70 hover:opacity-100 hover:scale-110 transition-opacity transition-transform duration-300">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== TESTIMONIALS SECTION ===== -->
+    <section class="testimonials section bg-white py-2" id="testimonials">
+        <div class="container mx-auto px-2 md:px-4">
+            <div class="text-center mb-2" data-aos="fade-up">
+                <h2 class="text-3xl font-bold mb-1 text-gray-800" style="font-size:35px">What People Say</h2>
+                <div class="w-20 h-1 bg-blue-600 mx-auto"></div>
+            </div>
+            <div class="testimonials-scroll-container">
+                <div class="testimonials-row">
+                    <div class="testimonial-card bg-white rounded-lg shadow-lg p-4">
+                        <div class="text-center">
+                            <img src="https://plus.unsplash.com/premium_photo-1682089787056-9ac0c78a2ac2?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8aW5kaWFuJTIwcGVvcGxlfGVufDB8fDB8fHww" alt="Ravi Kumar" class="testimonial-img mx-auto mb-3" />
+                            <div class="flex justify-center mb-2">
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                            </div>
+                            <p class="testimonial-description text-gray-700 mb-3 text-sm italic">
+                                "Volunteering with Helping Hands has been one of the most rewarding experiences of my life. The organization's commitment to making a real difference in communities is inspiring."
+                            </p>
+                            <h4 class="testimonial-name font-bold text-gray-800 text-lg">Ravi Kumar</h4>
+                            <p class="testimonial-role text-blue-600 text-sm">Volunteer Coordinator</p>
+                        </div>
+                    </div>
+                    <div class="testimonial-card bg-white rounded-lg shadow-lg p-4">
+                        <div class="text-center">
+                            <img src="https://media.istockphoto.com/id/1354842602/photo/portrait-of-a-young-businesswoman-working-on-a-laptop-in-an-office.jpg?s=612x612&w=0&k=20&c=kfP1g2712RiaxsDriIxFo363ARlaL2D591s-22CnIo8=" alt="Divya" class="testimonial-img mx-auto mb-3" />
+                            <div class="flex justify-center mb-2">
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                            </div>
+                            <p class="testimonial-description text-gray-700 mb-3 text-sm italic">
+                                "The impact Helping Hands has made in our village is incredible. They didn't just provide clean water - they empowered our community with knowledge and skills."
+                            </p>
+                            <h4 class="testimonial-name font-bold text-gray-800 text-lg">Divya</h4>
+                            <p class="testimonial-role text-blue-600 text-sm">Community Leader</p>
+                        </div>
+                    </div>
+                    <div class="testimonial-card bg-white rounded-lg shadow-lg p-4">
+                        <div class="text-center">
+                            <img src="https://www.shutterstock.com/image-photo/serious-thoughtful-young-indian-man-260nw-2315729055.jpg" alt="Karuna Sagar" class="testimonial-img mx-auto mb-3" />
+                            <div class="flex justify-center mb-2">
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                            </div>
+                            <p class="testimonial-description text-gray-700 mb-3 text-sm italic">
+                                "As a donor, I appreciate how transparent Helping Hands is about where my contributions go. I can see the real impact of my donations through their detailed reports."
+                            </p>
+                            <h4 class="testimonial-name font-bold text-gray-800 text-lg">Karuna Sagar</h4>
+                            <p class="testimonial-role text-blue-600 text-sm">Regular Donor</p>
+                        </div>
+                    </div>
+                    <div class="testimonial-card bg-white rounded-lg shadow-lg p-4">
+                        <div class="text-center">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80" alt="Priya Sharma" class="testimonial-img mx-auto mb-3" />
+                            <div class="flex justify-center mb-2">
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                            </div>
+                            <p class="testimonial-description text-gray-700 mb-3 text-sm italic">
+                                "The training I received from Helping Hands helped me start my own small business. Their support goes beyond just immediate aid."
+                            </p>
+                            <h4 class="testimonial-name font-bold text-gray-800 text-lg">Priya Sharma</h4>
+                            <p class="testimonial-role text-blue-600 text-sm">Entrepreneur</p>
+                        </div>
+                    </div>
+                    <div class="testimonial-card bg-white rounded-lg shadow-lg p-4">
+                        <div class="text-center">
+                            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Dr. Amit Patel" class="testimonial-img mx-auto mb-3" />
+                            <div class="flex justify-center mb-2">
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                            </div>
+                            <p class="testimonial-description text-gray-700 mb-3 text-sm italic">
+                                "As a medical professional, I've seen the healthcare initiatives of Helping Hands save countless lives in rural communities."
+                            </p>
+                            <h4 class="testimonial-name font-bold text-gray-800 text-lg">Dr. Amit Patel</h4>
+                            <p class="testimonial-role text-blue-600 text-sm">Medical Director</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== VOLUNTEER FORM SECTION ===== -->
+    <section id="volunteer" class="section-bg py-4">
+        <div class="container mx-auto px-2 md:px-4">
+            <div class="text-center mb-6" data-aos="fade-up">
+                <h2 class="text-3xl font-bold mb-1 text-gray-800" style="font-size:35px">Join Our Volunteer Team</h2>
+                <div class="w-20 h-1 bg-blue-600 mx-auto"></div>
+            </div>
+            <div class="max-w-6xl mx-auto bg-white rounded-lg shadow-xl overflow-hidden" data-aos="fade-up">
+                <div class="md:flex">
+                    <div class="md:w-1/2 bg-blue-600 px-12 py-3 text-gray-100">
+                        <h3 class="text-2xl font-bold mb-4" style="color:#FFFFFF">Why Volunteer With Us?</h3>
+                        <ul class="space-y-1">
+                            <li class="flex items-start text-sm">
+                                <i class="fas fa-check-circle mt-1 mr-3"></i>
+                                <span>Make a real difference in people's lives</span>
+                            </li>
+                            <li class="flex items-start text-sm">
+                                <i class="fas fa-check-circle mt-1 mr-3"></i>
+                                <span>Gain valuable experience and skills</span>
+                            </li>
+                            <li class="flex items-start text-sm">
+                                <i class="fas fa-check-circle mt-1 mr-3"></i>
+                                <span>Join a global community of changemakers</span>
+                            </li>
+                            <li class="flex items-start text-sm">
+                                <i class="fas fa-check-circle mt-1 mr-3"></i>
+                                <span>Flexible opportunities to match your schedule</span>
+                            </li>
+                            <li class="flex items-start text-sm">
+                                <i class="fas fa-check-circle mt-1 mr-3"></i>
+                                <span>Receive training and ongoing support</span>
+                            </li>
+                        </ul>
+                        <div class="mt-3">
+                            <h4 class="font-bold mb-2" style="color:#FFFFFF">Volunteer Opportunities</h4>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="bg-blue-700 px-3 py-1 rounded-full text-xs">Education</span>
+                                <span class="bg-blue-700 px-3 py-1 rounded-full text-xs">Healthcare</span>
+                                <span class="bg-blue-700 px-3 py-1 rounded-full text-xs">Construction</span>
+                                <span class="bg-blue-700 px-3 py-1 rounded-full text-xs">Fundraising</span>
+                                <span class="bg-blue-700 px-3 py-1 rounded-full text-xs">Translation</span>
+                                <span class="bg-blue-700 px-3 py-1 rounded-full text-xs">IT Support</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="md:w-1/2 px-12 py-3">
+                        <form id="volunteerForm" class="space-y-3">
+                            <div>
+                                <label for="fullname" class="block text-gray-700 mb-1">Full Name</label>
+                                <input type="text" id="fullname" name="fullname" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                                <p id="fullname-error" class="text-red-500 text-sm mt-1 hidden">Please enter your full name</p>
+                            </div>
+                            <div>
+                                <label for="email" class="block text-gray-700 mb-1">Email</label>
+                                <input type="email" id="email" name="email" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                                <p id="email-error" class="text-red-500 text-sm mt-1 hidden">Please enter a valid email address</p>
+                            </div>
+                            <div>
+                                <label for="phone" class="block text-gray-700 mb-1">Phone</label>
+                                <input type="tel" id="phone" name="phone" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                                <p id="phone-error" class="text-red-500 text-sm mt-1 hidden">Please enter a valid phone number</p>
+                            </div>
+                            <div>
+                                <label for="interest" class="block text-gray-700 mb-1">Area of Interest</label>
+                                <select id="interest" name="interest" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                                    <option value="">Select an option</option>
+                                    <option value="education">Education</option>
+                                    <option value="healthcare">Healthcare</option>
+                                    <option value="construction">Construction</option>
+                                    <option value="fundraising">Fundraising</option>
+                                    <option value="translation">Translation</option>
+                                    <option value="it">IT Support</option>
+                                    <option value="other">Other</option>
+                                </select>
+                                <p id="interest-error" class="text-red-500 text-sm mt-1 hidden">Please select an area of interest</p>
+                            </div>
+                            <div>
+                                <label for="message" class="block text-gray-700 mb-1">Why do you want to volunteer with us?</label>
+                                <textarea id="message" name="message" rows="2" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="terms" name="terms" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" required>
+                                <label for="terms" class="ml-2 block text-sm text-gray-700">
+                                    I agree to the <a href="#" class="text-blue-600 hover:underline">terms and conditions</a>
+                                </label>
+                            </div>
+                            <button type="submit" class="btn-hover-effect btn-primary w-full font-bold py-3 px-4 rounded-lg shadow-lg">Submit Application</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== VOLUNTEER SEARCH SECTION ===== -->
+    <section class="bg-white py-16">
+        <div class="container mx-auto px-2 md:px-4">
+            <div class="max-w-3xl mx-auto" data-aos="fade-up">
+                <h2 class="text-3xl font-bold mb-8 text-center text-gray-800" style="font-size:35px">Find Volunteers Near You</h2>
+                <div class="mb-6 relative">
+                    <input type="text" id="volunteer-search" placeholder="Search by skill or location..." class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <i class="fas fa-search absolute right-3 top-3 text-gray-400"></i>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="volunteer-list">
+                    <!-- Volunteer cards will be added here by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== EVENTS TIMELINE SECTION ===== -->
+    <section id="events" class="section-bg py-16">
+        <div class="container mx-auto px-2 md:px-4">
+            <div class="text-center mb-12" data-aos="fade-up">
+                <h2 class="text-3xl font-bold mb-4 text-gray-800" style="font-size:35px">Our Events</h2>
+                <div class="w-20 h-1 bg-blue-600 mx-auto"></div>
+            </div>
+            <div class="max-w-3xl mx-auto">
+                <div class="space-y-8">
+                    <div class="timeline-item relative pl-8" data-aos="fade-right">
+                        <div class="absolute left-0 top-0 w-4 h-4 rounded-full bg-blue-600 border-4 border-white"></div>
+                        <div class="bg-white p-6 rounded-lg shadow-md">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-bold text-lg text-gray-800">Community Health Fair</h3>
+                                <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Upcoming</span>
+                            </div>
+                            <div class="flex items-center text-sm text-gray-500 mb-3">
+                                <i class="far fa-calendar-alt mr-2"></i>
+                                <span>June 15, 2023 | 9:00 AM - 4:00 PM</span>
+                            </div>
+                            <div class="flex items-center text-sm text-gray-500 mb-4">
+                                <i class="fas fa-map-marker-alt mr-2"></i>
+                                <span>Sri Chamarajendra Park, Karnataka, India</span>
+                            </div>
+                            <p class="text-gray-700 mb-4">Join us for our annual health fair offering free health screenings, vaccinations, and wellness education for the community.</p>
+                            <button class="btn-hover-effect btn-primary text-sm font-bold py-2 px-4 rounded">Register Now</button>
+                        </div>
+                    </div>
+                    <div class="timeline-item relative pl-8" data-aos="fade-right" data-aos-delay="100">
+                        <div class="absolute left-0 top-0 w-4 h-4 rounded-full bg-blue-600 border-4 border-white"></div>
+                        <div class="bg-white p-6 rounded-lg shadow-md">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-bold text-lg text-gray-800">School Construction Project</h3>
+                                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Completed</span>
+                            </div>
+                            <div class="flex items-center text-sm text-gray-500 mb-3">
+                                <i class="far fa-calendar-alt mr-2"></i>
+                                <span>April 5-30, 2023</span>
+                            </div>
+                            <div class="flex items-center text-sm text-gray-500 mb-4">
+                                <i class="fas fa-map-marker-alt mr-2"></i>
+                                <span>Rural Village, Andhra Pradesh, India</span>
+                            </div>
+                            <p class="text-gray-700 mb-4">Our team successfully built a new primary school serving 200 children in a rural Kenyan village. Thank you to all the volunteers who made this possible!</p>
+                            <button class="btn-hover-effect bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-bold py-2 px-4 rounded">View Photos</button>
+                        </div>
+                    </div>
+                    <div class="timeline-item relative pl-8" data-aos="fade-right" data-aos-delay="200">
+                        <div class="absolute left-0 top-0 w-4 h-4 rounded-full bg-blue-600 border-4 border-white"></div>
+                        <div class="bg-white p-6 rounded-lg shadow-md">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-bold text-lg text-gray-800">Fundraising Gala</h3>
+                                <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full">Ongoing</span>
+                            </div>
+                            <div class="flex items-center text-sm text-gray-500 mb-3">
+                                <i class="far fa-calendar-alt mr-2"></i>
+                                <span>May 20 - June 30, 2023</span>
+                            </div>
+                            <div class="flex items-center text-sm text-gray-500 mb-4">
+                                <i class="fas fa-map-marker-alt mr-2"></i>
+                                <span>Virtual Event</span>
+                            </div>
+                            <p class="text-gray-700 mb-4">Our annual fundraising campaign is underway! Help us reach our $500,000 goal to support clean water projects in 10 developing countries.</p>
+                            <button class="btn-hover-effect btn-primary text-sm font-bold py-2 px-4 rounded">Donate Now</button>
+                        </div>
+                    </div>
+                    <div class="timeline-item relative pl-8" data-aos="fade-right" data-aos-delay="300">
+                        <div class="absolute left-0 top-0 w-4 h-4 rounded-full bg-blue-600 border-4 border-white"></div>
+                        <div class="bg-white p-6 rounded-lg shadow-md">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-bold text-lg text-gray-800">Volunteer Training Workshop</h3>
+                                <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Upcoming</span>
+                            </div>
+                            <div class="flex items-center text-sm text-gray-500 mb-3">
+                                <i class="far fa-calendar-alt mr-2"></i>
+                                <span>July 8, 2023 | 10:00 AM - 2:00 PM</span>
+                            </div>
+                            <div class="flex items-center text-sm text-gray-500 mb-4">
+                                <i class="fas fa-map-marker-alt mr-2"></i>
+                                <span>Helping Hands HQ, Tarnaka, Hyderabad, Telangana, India</span>
+                            </div>
+                            <p class="text-gray-700 mb-4">Mandatory training session for all new volunteers. Learn about our organization, safety protocols, and how to make the most of your volunteer experience.</p>
+                            <button class="btn-hover-effect btn-primary text-sm font-bold py-2 px-4 rounded">Register Now</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== GALLERY SECTION ===== -->
+    <section id="gallery" class="bg-white py-16">
+        <div class="container mx-auto px-2 md:px-4">
+            <div class="text-center mb-12" data-aos="fade-up">
+                <h2 class="text-3xl font-bold mb-4 text-gray-800" style="font-size:35px">Our Work in Action</h2>
+                <div class="w-20 h-1 bg-blue-600 mx-auto"></div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="gallery-item overflow-hidden rounded-lg shadow-md cursor-pointer" data-aos="zoom-in">
+                    <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80" alt="Volunteers building a house" class="w-full h-64 object-cover transition-transform duration-500 hover:scale-110">
+                </div>
+                <div class="gallery-item overflow-hidden rounded-lg shadow-md cursor-pointer" data-aos="zoom-in" data-aos-delay="100">
+                    <img src="https://images.unsplash.com/photo-1521791055366-0d553872125f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1469&q=80" alt="Children in classroom" class="w-full h-64 object-cover transition-transform duration-500 hover:scale-110">
+                </div>
+                <div class="gallery-item overflow-hidden rounded-lg shadow-md cursor-pointer" data-aos="zoom-in" data-aos-delay="200">
+                    <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80" alt="Medical volunteers" class="w-full h-64 object-cover transition-transform duration-500 hover:scale-110">
+                </div>
+                <div class="gallery-item overflow-hidden rounded-lg shadow-md cursor-pointer" data-aos="zoom-in" data-aos-delay="300">
+                    <img src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Food distribution" class="w-full h-64 object-cover transition-transform duration-500 hover:scale-110">
+                </div>
+                <div class="gallery-item overflow-hidden rounded-lg shadow-md cursor-pointer" data-aos="zoom-in" data-aos-delay="400">
+                    <img src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Clean water project" class="w-full h-64 object-cover transition-transform duration-500 hover:scale-110">
+                </div>
+                <div class="gallery-item overflow-hidden rounded-lg shadow-md cursor-pointer" data-aos="zoom-in" data-aos-delay="500">
+                    <img src="https://images.unsplash.com/photo-1545205597-3d9d02c29597?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Community meeting" class="w-full h-64 object-cover transition-transform duration-500 hover:scale-110">
+                </div>
+            </div>
+            <div class="text-center mt-8" data-aos="fade-up">
+                <button id="view-more-gallery" class="btn-hover-effect btn-primary font-bold py-3 px-6 rounded-full shadow-lg">View More Photos</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== LIGHTBOX OVERLAY ===== -->
+    <div id="lightbox" class="lightbox-overlay">
+        <span class="lightbox-close">&times;</span>
+        <img src="" alt="" class="lightbox-image">
+    </div>
+
+    <!-- ===== CONTACT & MAP SECTION ===== -->
+    <section id="contact" class="section-bg py-16">
+        <div class="container mx-auto px-2 md:px-4">
+            <div class="flex flex-col md:flex-row">
+                <div class="md:w-1/2 mb-8 md:mb-0 md:pr-8" data-aos="fade-right">
+                    <h2 class="text-3xl font-bold mb-6 text-gray-800">Contact Us</h2>
+                    <div class="space-y-6">
+                        <div class="flex items-start">
+                            <i class="fas fa-map-marker-alt text-blue-600 mt-1 mr-4 text-xl"></i>
+                            <div>
+                                <h3 class="font-bold text-gray-800">Headquarters</h3>
+                                <p class="text-gray-700">42, MG Road, Karnataka, India</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-phone-alt text-blue-600 mt-1 mr-4 text-xl"></i>
+                            <div>
+                                <h3 class="font-bold text-gray-800">Phone</h3>
+                                <p class="text-gray-700">+91 9876543210</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-envelope text-blue-600 mt-1 mr-4 text-xl"></i>
+                            <div>
+                                <h3 class="font-bold text-gray-800">Email</h3>
+                                <p class="text-gray-700">info@helpinghands.org</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-clock text-blue-600 mt-1 mr-4 text-xl"></i>
+                            <div>
+                                <h3 class="font-bold text-gray-800">Office Hours</h3>
+                                <p class="text-gray-700">Monday - Friday: 9:00 AM - 5:00 PM</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-8">
+                        <h3 class="font-bold mb-4 text-gray-800">Download Our Brochure</h3>
+                        <a href="#" download="Helping-Hands-Brochure.pdf" class="btn-hover-effect btn-primary inline-block font-bold py-3 px-6 rounded-full shadow-lg">
+                            <i class="fas fa-download mr-2"></i> Download PDF
+                        </a>
+                    </div>
+                </div>
+                <div class="md:w-1/2" data-aos="fade-left">
+                    <div class="h-full w-full rounded-lg overflow-hidden shadow-xl">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3887.974626396714!2d77.61643931477086!3d12.97253!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae168335970df5%3A0x5ab69f1a04aa1257!2s42%2C%20Mahatma%20Gandhi%20Rd%2C%20Yellappa%20Chetty%20Layout%2C%20Sivanchetti%20Gardens%2C%20Bengaluru%2C%20Karnataka%20560025!5e0!3m2!1sen!2sin!4v1698765432109!5m2!1sen!2sin" width="100%" height="100%" style="min-height: 400px;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER SECTION ===== -->
+    <footer class="bg-slate-800 text-gray-100 py-12">
+        <div class="container mx-auto px-2 md:px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4" style="color:white">Helping Hands</h3>
+                    <p class="text-gray-400">Empowering communities through sustainable development projects since 2010.</p>
+                    <div class="flex space-x-4 mt-6">
+                        <a href="#" class="text-gray-400 hover:text-gray-100 transition-colors duration-300"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-gray-100 transition-colors duration-300"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-gray-100 transition-colors duration-300"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-gray-100 transition-colors duration-300"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-gray-100 transition-colors duration-300"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4" style="color:white">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#home" class="text-gray-400 hover:text-gray-100 transition-colors duration-300">Home</a></li>
+                        <li><a href="#about" class="text-gray-400 hover:text-gray-100 transition-colors duration-300">About Us</a></li>
+                        <li><a href="#volunteer" class="text-gray-400 hover:text-gray-100 transition-colors duration-300">Volunteer</a></li>
+                        <li><a href="#events" class="text-gray-400 hover:text-gray-100 transition-colors duration-300">Events</a></li>
+                        <li><a href="#gallery" class="text-gray-400 hover:text-gray-100 transition-colors duration-300">Gallery</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4" style="color:white">Our Work</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-gray-100 transition-colors duration-300">Education</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-gray-100 transition-colors duration-300">Healthcare</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-gray-100 transition-colors duration-300">Clean Water</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-gray-100 transition-colors duration-300">Economic Development</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-gray-100 transition-colors duration-300">Disaster Relief</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4" style="color:white">Newsletter</h3>
+                    <p class="text-gray-400 mb-4">Subscribe to our newsletter to receive updates on our projects and volunteer opportunities.</p>
+                    <form class="flex">
+                        <input type="email" placeholder="Your email" class="px-4 py-2 w-full rounded-l-lg focus:outline-none text-gray-800">
+                        <button type="submit" class="btn-primary px-4 py-2 rounded-r-lg">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400 mb-4 md:mb-0">© 2023 Helping Hands NGO. All rights reserved.</p>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-gray-100 transition-colors duration-300">Privacy Policy</a>
+                    <a href="#" class="text-gray-400 hover:text-gray-100 transition-colors duration-300">Terms of Service</a>
+                    <a href="#" class="text-gray-400 hover:text-gray-100 transition-colors duration-300">Contact Us</a>
+                </div>
+            </div>
+            <div class="mt-6 text-center text-gray-400">
+                <p style="color:white">Built by 
+                    <a href="https://www.linkedin.com/in/poorna-sai-sriharsha-perina/" target="_blank" class="ml-2 text-blue-400 hover:text-blue-600">
+                        <i class="fab fa-linkedin"></i>
+                    </a>
+                    <a href="https://github.com/Poorna-Sai-Sriharsha" target="_blank" class="text-purple-400 hover:text-purple-600">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    Poorna Sai Sriharsha Perina
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ===== AI CHATBOT WIDGET ===== -->
+    <div id="chatbot-container" class="fixed bottom-20 right-6 w-80 bg-white rounded-t-xl shadow-2xl overflow-hidden transition-all duration-300 transform translate-y-4 opacity-0 z-50">
+        <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-gray-100 p-4 flex justify-between items-center">
+            <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center mr-2">
+                    <i class="fas fa-hands-helping text-blue-600"></i>
+                </div>
+                <h3 class="font-bold" style="color:#FFFFFF">Helping Hands AI</h3>
+            </div>
+            <button id="chatbot-close" class="text-gray-100 hover:text-gray-200">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="chatbot-messages" class="h-64 p-4 overflow-y-auto bg-gray-50">
+            <div class="chatbot-message bg-white rounded-lg p-3 mb-2 shadow-sm max-w-[80%]">
+                <p class="text-sm text-gray-800">Hello! I'm your Helping Hands assistant. How can I help you today? 😊</p>
+            </div>
+        </div>
+        <div id="faqPopup" class="hidden absolute bottom-48 right-0 bg-white border border-gray-200 rounded-lg shadow-lg p-3 w-72 z-20">
+            <button onclick="selectFaq('How can I volunteer with Helping Hands?')" class="block w-full text-left p-3 hover:bg-blue-50 rounded text-sm font-medium border-b border-gray-100">How can I volunteer with Helping Hands?</button>
+            <button onclick="selectFaq('What programs does Helping Hands offer?')" class="block w-full text-left p-3 hover:bg-blue-50 rounded text-sm font-medium border-b border-gray-100">What programs does Helping Hands offer?</button>
+            <button onclick="selectFaq('How can I donate to Helping Hands?')" class="block w-full text-left p-3 hover:bg-blue-50 rounded text-sm font-medium border-b border-gray-100">How can I donate to Helping Hands?</button>
+            <button onclick="selectFaq('Where does Helping Hands operate?')" class="block w-full text-left p-3 hover:bg-blue-50 rounded text-sm font-medium border-b border-gray-100">Where does Helping Hands operate?</button>
+            <button onclick="selectFaq('What is the impact of Helping Hands?')" class="block w-full text-left p-3 hover:bg-blue-50 rounded text-sm font-medium border-b border-gray-100">What is the impact of Helping Hands?</button>
+            <button onclick="selectFaq('How can I contact Helping Hands?')" class="block w-full text-left p-3 hover:bg-blue-50 rounded text-sm font-medium">How can I contact Helping Hands?</button>
+        </div>
+        <div class="p-3 bg-white border-t border-gray-200">
+            <div class="flex justify-between mb-2">
+                <button id="faq-btn" class="text-xs bg-blue-100 text-blue-600 px-3 py-2 rounded hover:bg-blue-200 transition-colors duration-200 font-medium">FAQs</button>
+                <button id="donate-btn" class="text-xs bg-green-100 text-green-600 px-3 py-2 rounded hover:bg-green-200 transition-colors duration-200 font-medium">Donate</button>
+            </div>
+            <div class="flex">
+                <input type="text" id="chatbot-input" placeholder="Type your question..." class="flex-1 px-3 py-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button id="chatbot-send" class="btn-primary px-4 py-2 rounded-r-lg">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+            <div class="flex justify-between mt-2 text-xs text-gray-500">
+                <span>Try: "How can I volunteer?"</span>
+                <button id="chatbot-clear" class="hover:text-blue-600">Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== BACK TO TOP BUTTON ===== -->
+    <button id="back-to-top" class="fixed bottom-6 left-6 w-12 h-12 bg-gradient-to-r from-blue-600 to-blue-800 text-gray-100 rounded-full shadow-xl flex items-center justify-center hover:shadow-2xl transition-all duration-300 z-50 opacity-0 pointer-events-none">
+        <i class="fas fa-arrow-up text-lg"></i>
+    </button>
+
+    <!-- ===== CHATBOT TOGGLE BUTTON ===== -->
+    <button id="chatbot-toggle" class="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-blue-600 to-blue-800 text-gray-100 rounded-full shadow-xl flex items-center justify-center hover:shadow-2xl transition-all duration-300 z-50">
+        <i class="fas fa-hands-helping text-xl"></i>
+    </button>
+
+    <!-- ===== EXTERNAL JAVASCRIPT LIBRARIES ===== -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
